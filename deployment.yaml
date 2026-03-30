@@ -31,11 +31,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: product-service
+      app: rj-product-service
   template:
     metadata:
       labels:
-        app: product-service
+        app: rj-product-service
     spec:
       containers:
       - name: rj-product-service
