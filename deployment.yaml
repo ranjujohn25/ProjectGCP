@@ -101,7 +101,7 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: order-service
+      app: rj-order-service
   template:
     metadata:
       labels:
