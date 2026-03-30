@@ -1,18 +1,34 @@
-# 1. Create a dedicated Namespace
+# 1. Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
   name: rj-ecommerce-app
 ---
-
-# 2. Product Service
+# 2. Network Policy: Full Open Access
+# This explicitly allows all traffic to/from all pods in this namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-traffic
+  namespace: rj-ecommerce-app
+spec:
+  podSelector: {} # Matches all pods
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - {} # Allows all incoming traffic
+  egress:
+  - {} # Allows all outgoing traffic
+---
+# 3. Product Service (Deployment + Service)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: product-service
   namespace: rj-ecommerce-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: product-service
@@ -23,7 +39,7 @@ spec:
     spec:
       containers:
       - name: product-service
-        image: your-docker-hub-username/product-service:latest
+        image: your-docker-hub/product-service:latest
         ports:
         - containerPort: 5001
 ---
@@ -33,22 +49,21 @@ metadata:
   name: product-service
   namespace: rj-ecommerce-app
 spec:
+  type: ClusterIP
   selector:
     app: product-service
   ports:
-    - protocol: TCP
-      port: 5001
-      targetPort: 5001
+  - port: 5001
+    targetPort: 5001
 ---
-
-# 3. Cart Service
+# 4. Cart Service (Deployment + Service)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cart-service
   namespace: rj-ecommerce-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: cart-service
@@ -59,7 +74,7 @@ spec:
     spec:
       containers:
       - name: cart-service
-        image: your-docker-hub-username/cart-service:latest
+        image: your-docker-hub/cart-service:latest
         ports:
         - containerPort: 5002
 ---
@@ -69,22 +84,21 @@ metadata:
   name: cart-service
   namespace: rj-ecommerce-app
 spec:
+  type: ClusterIP
   selector:
     app: cart-service
   ports:
-    - protocol: TCP
-      port: 5002
-      targetPort: 5002
+  - port: 5002
+    targetPort: 5002
 ---
-
-# 4. Order Service
+# 5. Order Service (Deployment + Service)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: order-service
   namespace: rj-ecommerce-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: order-service
@@ -95,7 +109,7 @@ spec:
     spec:
       containers:
       - name: order-service
-        image: your-docker-hub-username/order-service:latest
+        image: your-docker-hub/order-service:latest
         ports:
         - containerPort: 5003
 ---
@@ -105,22 +119,21 @@ metadata:
   name: order-service
   namespace: rj-ecommerce-app
 spec:
+  type: ClusterIP
   selector:
     app: order-service
   ports:
-    - protocol: TCP
-      port: 5003
-      targetPort: 5003
+  - port: 5003
+    targetPort: 5003
 ---
-
-# 5. Gateway (Frontend)
+# 6. Gateway / Frontend (Deployment + Service)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway
   namespace: rj-ecommerce-app
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: gateway
@@ -131,17 +144,16 @@ spec:
     spec:
       containers:
       - name: gateway
-        image: your-docker-hub-username/gateway:latest
+        image: your-docker-hub/gateway:latest
         ports:
         - containerPort: 5000
         env:
-        # Internal DNS names: http://<service-name>.<namespace>.svc.cluster.local
         - name: PRODUCT_SVC_URL
-          value: "http://cluster.local"
+          value: "http://product-service:5001"
         - name: CART_SVC_URL
-          value: "http://cluster.local"
+          value: "http://cart-service:5002"
         - name: ORDER_SVC_URL
-          value: "http://cluster.local"
+          value: "http://order-service:5003"
 ---
 apiVersion: v1
 kind: Service
@@ -149,10 +161,9 @@ metadata:
   name: gateway-service
   namespace: rj-ecommerce-app
 spec:
-  type: LoadBalancer # Exposes the frontend to the internet
+  type: LoadBalancer # Exposes the app to the internet
   selector:
     app: gateway
   ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 5000
+  - port: 80
+    targetPort: 5000
