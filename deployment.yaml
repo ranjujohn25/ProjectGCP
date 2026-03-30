@@ -86,7 +86,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: cart-service
+    app: rj-cart-service
   ports:
   - port: 5002
     targetPort: 5002
