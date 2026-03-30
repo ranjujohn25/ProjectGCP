@@ -149,11 +149,11 @@ spec:
         - containerPort: 5000
         env:
         - name: PRODUCT_SVC_URL
-          value: "http://product-service:5001"
+          value: "http://rj-product-service:5001"
         - name: CART_SVC_URL
-          value: "http://cart-service:5002"
+          value: "http://rj-cart-service:5002"
         - name: ORDER_SVC_URL
-          value: "http://order-service:5003"
+          value: "http://rj-order-service:5003"
 ---
 apiVersion: v1
 kind: Service
