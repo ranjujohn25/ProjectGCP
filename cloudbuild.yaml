@@ -1,80 +1,39 @@
-# ================================
-# Cloud Build Options.
-# ================================
+steps:
+  # 1. Build Gateway Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjfrontendservice:latest', '-f', 'Dockerfile.gateway', '.']
+
+  # 2. Build Product Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjproductservice:latest', '-f', 'Dockerfile.product', '.']
+
+  # 3. Build Cart Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjcartservice:latest', '-f', 'Dockerfile.cart', '.']
+
+  # 4. Build Order Service
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjorderservice:latest', '-f', 'Dockerfile.order', '.']
+
+  # 5. Push all images to Artifact Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjfrontendservice:latest']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjproductservice:latest']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjcartservice:latest']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjorderservice:latest']
+
+  # 6. Deploy to GKE
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud container clusters get-credentials ranju-cp1-cluster-1 --zone asia-south1-c --project citric-kit-489316-g6
+        kubectl apply -f deployment.yaml
+
+
 options:
   logging: CLOUD_LOGGING_ONLY
-
-#logsBucket: gs://ranju1-build-logs-bucket
-
-# ================================
-# Substitutions
-# ================================
-substitutions:
-  _IMAGE: asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjcartservice
-
-# ================================
-# Steps
-# ================================
-steps:
-
-# Step 1: Build Docker image
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'Build Image'
-  args:
-    - build
-    - '-t'
-    - '${_IMAGE}:$SHORT_SHA'
-    - '-t'
-    - '${_IMAGE}:latest'
-    - '.'
-
-# Step 2: Push Docker image to Artifact Registry
-- name: 'gcr.io/cloud-builders/docker'
-  id: 'Push Image'
-  args:
-    - push
-    - '--all-tags'
-    - '${_IMAGE}'
-
-# Step 3: Update GKE deployment with the new image
-- name: 'gcr.io/cloud-builders/kubectl'
-  id: 'Deploy to GKE'
-  args:
-    - set
-    - image
-    - deployment/rj-cart-service
-    - flask-container=${_IMAGE}:$SHORT_SHA
-  env:
-    - 'CLOUDSDK_COMPUTE_REGION=asia-south1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=ranju-cp1-cluster-1'
-
-# Step 4: Verify rollout
-- name: 'gcr.io/cloud-builders/kubectl'
-  id: 'Verify Rollout'
-  args:
-    - rollout
-    - status
-    - deployment/rj-cart-service
-  env:
-    - 'CLOUDSDK_COMPUTE_REGION=asia-south1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=ranju-cp1-cluster-1'
-
-# Step 5: Auto Rollback if deployment fails
-- name: 'gcr.io/cloud-builders/kubectl'
-  id: 'Rollback on Failure'
-  entrypoint: 'bash'
-  args:
-    - '-c'
-    - |
-      kubectl rollout status deployment/rj-cart-service || \
-      kubectl rollout undo deployment/rj-cart-service
-  env:
-    - 'CLOUDSDK_COMPUTE_REGION=asia-south1'
-    - 'CLOUDSDK_CONTAINER_CLUSTER=ranju-cp1-cluster-1'
-
-# ================================
-# Store Images
-# ================================
-images:
-  - '${_IMAGE}:$SHORT_SHA'
-  - '${_IMAGE}:latest'
