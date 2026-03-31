@@ -1,7 +1,7 @@
 steps:
   # 1. Build Gateway Service
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t',  '...', 'asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjfrontendservice:latest', '-f', './Frontend Gateway/Dockerfile']
+    args: ['build', '-t',  '...', 'asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjfrontendservice:latest', '-f', './Frontend Gateway/']
 
   # 2. Build Product Service
   - name: 'gcr.io/cloud-builders/docker'
