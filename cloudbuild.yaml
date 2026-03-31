@@ -1,19 +1,19 @@
 steps:
   # 1. Build Gateway Service
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjfrontendservice:latest', '-f', './Frontend Gateway/Dockerfile', '.']
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjfrontendservice:latest', '-f', './Frontend Gateway/Dockerfile', './Frontend Gateway']
 
   # 2. Build Product Service
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjproductservice:latest', '-f', './Product Service/Dockerfile', '.']
+    args: ['build', '-t', 'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjproductservice:latest', '-f', './Product Service/Dockerfile', './Product Service']
 
   # 3. Build Cart Service
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t',  'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjcartservice:latest', '-f', './Cart Service/Dockerfile', '.']
+    args: ['build', '-t',  'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjcartservice:latest', '-f', './Cart Service/Dockerfile', './Cart Service']
 
   # 4. Build Order Service
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t',  'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjorderservice:latest', '-f', './Order Service/Dockerfile', '.']
+    args: ['build', '-t',  'asia-south1-docker.pkg.dev/$PROJECT_ID/ranjuartifactrepo/rjorderservice:latest', '-f', './Order Service/Dockerfile', './Order Service']
 
   # 5. Push all images to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
