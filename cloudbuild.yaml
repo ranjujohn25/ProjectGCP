@@ -42,7 +42,7 @@ steps:
   args:
     - set
     - image
-    - deployment/capstoneproject1-deployment
+    - deployment/rj-cart-service
     - flask-container=${_IMAGE}:$SHORT_SHA
   env:
     - 'CLOUDSDK_COMPUTE_REGION=asia-south1'
@@ -54,7 +54,7 @@ steps:
   args:
     - rollout
     - status
-    - deployment/capstoneproject1-deployment
+    - deployment/rj-cart-service
   env:
     - 'CLOUDSDK_COMPUTE_REGION=asia-south1'
     - 'CLOUDSDK_CONTAINER_CLUSTER=ranju-cp1-cluster-1'
