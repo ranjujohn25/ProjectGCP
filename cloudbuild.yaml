@@ -4,7 +4,7 @@
 options:
   logging: CLOUD_LOGGING_ONLY
 
-logsBucket: gs://ranju1-build-logs-bucket
+#logsBucket: gs://ranju1-build-logs-bucket
 
 # ================================
 # Substitutions
