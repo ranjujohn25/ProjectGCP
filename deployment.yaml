@@ -22,24 +22,51 @@ spec:
   - {} # Allows all outgoing traffic
 ---
 # 3. Product Service (Deployment + Service)
+# --- STABLE VERSION (Production) ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: rj-product-service
+  name: rj-product-stable
   namespace: rj-ecommerce-app
 spec:
-  replicas: 1
+  replicas: 3  # High number for main traffic
   selector:
     matchLabels:
       app: rj-product-service
+      version: stable
   template:
     metadata:
       labels:
         app: rj-product-service
+        version: stable
     spec:
       containers:
       - name: rj-product-service
         image: asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjproductservice:latest
+        ports:
+        - containerPort: 5001
+---
+# --- CANARY VERSION (New Release) ---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rj-product-canary
+  namespace: rj-ecommerce-app
+spec:
+  replicas: 1  # Small number for testing (e.g., 25% of traffic)
+  selector:
+    matchLabels:
+      app: rj-product-service
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: rj-product-service
+        version: canary
+    spec:
+      containers:
+      - name: rj-product-service
+        image: asia-south1-docker.pkg.dev/citric-kit-489316-g6/ranjuartifactrepo/rjproductservice:v1 # New Image
         ports:
         - containerPort: 5001
 ---
